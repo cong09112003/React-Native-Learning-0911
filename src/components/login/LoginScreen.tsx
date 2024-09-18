@@ -1,31 +1,48 @@
 import React, { useState } from "react";
 import {
-  StatusBar,
-  StyleSheet,
-  Text,
   View,
-  SafeAreaView,
-  TouchableOpacity,
-  Alert,
+  Text,
   TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
   Image,
+  Pressable,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { NavigationProp } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Fontisto";
 import CheckBox from "expo-checkbox";
 
-const LoginScreen = () => {
+interface Props {
+  navigation: NavigationProp<any>;
+}
+
+const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [isCheck, setIsCheck] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [checkEmail, setCheckEmail] = useState(true);
   const [errorrPassword, setErrorrPassword] = useState("");
-  const onSumbit = () => {
-    // Alert.alert("ok");
+
+  const setValueChange = () => {
+    setIsCheck(!isCheck);
+    Alert.alert("check ok!");
+  };
+
+  const handleLogin = async () => {
     let formData = {
       _email: email,
       _password: password,
       _checkBox: isCheck,
     };
+    console.log(formData);
     let regexEmail = new RegExp(
       /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
     );
@@ -37,11 +54,30 @@ const LoginScreen = () => {
     formData._password === ""
       ? setErrorrPassword("Invalid password")
       : setErrorrPassword("");
+
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "https://be-android-project.onrender.com/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+      const { token, user } = response.data;
+      await AsyncStorage.setItem("token", token);
+      Alert.alert("Login Successful", `Welcome ${user.username}`);
+      navigation.navigate("tab");
+    } catch (error) {
+      Alert.alert(
+        "Login Failed",
+        error.response?.data?.msg || "An error occurred"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
-  const setValueChange = () => {
-    setIsCheck(!isCheck);
-    Alert.alert("check ok!");
-  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={"#fff"} barStyle={"dark-content"}></StatusBar>
@@ -65,8 +101,8 @@ const LoginScreen = () => {
             style={styles.ip}
             onChangeText={(value) => setEmail(value)}
           ></TextInput>
-          <Text style={{ color: "red", marginTop: 10 }}>
-            {!checkEmail ? "InValid email" : ""}
+          <Text style={{ color: "red", marginTop: 10, fontSize: 11 }}>
+            {!checkEmail ? "Invalid email" : ""}
           </Text>
         </View>
         <View style={styles.group}>
@@ -77,7 +113,9 @@ const LoginScreen = () => {
             style={styles.ip}
             onChangeText={(value) => setPassword(value)}
           ></TextInput>
-          <Text style={{ color: "red", marginTop: 10 }}>{errorrPassword}</Text>
+          <Text style={{ color: "red", marginTop: 10, fontSize: 10 }}>
+            {errorrPassword}
+          </Text>
         </View>
         <View style={styles.groupCheck}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -98,26 +136,79 @@ const LoginScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity style={styles.btn} onPress={() => onSumbit()}>
+        <TouchableOpacity style={styles.btn} onPress={() => handleLogin()}>
           <Text style={{ color: "#fff", fontWeight: "bold" }}>Login</Text>
         </TouchableOpacity>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginVertical: 5,
+          }}
+        >
+          <Text style={{ fontSize: 16, color: "black" }}>
+            Don't have an account
+          </Text>
+          <Pressable
+            onPress={() => {
+              navigation.navigate("register");
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                color: "#0a0a48",
+                marginLeft: 6,
+              }}
+            >
+              Register
+            </Text>
+          </Pressable>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 5,
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: "grey",
+              marginHorizontal: 10,
+            }}
+          ></View>
+          <Text style={{ fontSize: 14 }}>Or Sign up with</Text>
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: "grey",
+              marginHorizontal: 10,
+            }}
+          ></View>
+        </View>
+
         <View style={styles.linkApps}>
           <View style={styles.linkAppsItems}>
-            <Image source={require("../../assets/facebook 1.png")} />
+            <Image source={require("../../../assets/images/facebook 1.png")} />
           </View>
           <View style={styles.linkAppsItems}>
-            <Image source={require("../../assets/instagram 1.png")} />
+            <Image source={require("../../../assets/images/instagram 1.png")} />
           </View>
           <View style={styles.linkAppsItems}>
-            <Image source={require("../../assets/pinterest 1.png")} />
+            <Image source={require("../../../assets/images/pinterest 1.png")} />
           </View>
         </View>
       </View>
-      {/* <Text> Email: {email}</Text>
-      <Text> Password: {password}</Text> */}
       <View>
         <Image
-          source={require("../../assets/Subtract.png")}
+          source={require("../../../assets/images/Subtract.png")}
           style={{ width: "100%" }}
         ></Image>
       </View>
@@ -171,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   linkAppsItems: {
     marginLeft: 10,

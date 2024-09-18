@@ -1,141 +1,83 @@
-// import { StatusBar } from "expo-status-bar";
-// import { StyleSheet, Image, Text, View } from "react-native";
-
-import {
-  Image,
-  StyleSheet,
-  View,
-  Text,
-  Button,
-  TouchableOpacity,
-  StatusBar,
-  PermissionsAndroid,
-} from "react-native";
-import HomeScreen from "./screens/home/HomeScreen";
-import LoginScreen from "./screens/login/LoginScreen";
-import Demo1 from "./screens/Demo1";
-import Demo2 from "./screens/Demo2";
-import NYC from "./screens/NYC";
+import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import Account from "./screens/Account";
-import AccountStack from "./screens/stacks/AccountStack";
-import NoteHomeScreen from "./screens/note/NoteHomeScreen";
-import NoteStack from "./screens/stacks/NoteStack";
-import TabNavigator from "./screens/TabNavigator";
-import Detail from "./screens/Detail";
-import RegisterScreen from "./screens/login/RegisterScreen";
+import { createStackNavigator } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import LoginScreen from "./src/components/login/LoginScreen";
+import ProfileScreen from "./src/components/profile/ProfileScreen";
+import RegisterScreen from "./src/components/register/RegisterScreen";
+import TabNavigator from "./src/screens/TabNavigator";
+import Detail from "./src/components/detail/Detail";
+import { ActivityIndicator, View, Alert } from "react-native";
+import Notification from "./src/components/notify/Notificaion";
 
-// const Home = ({ navigation }: any) => {
-//   return (
-//     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-//       <Text>Home Screen</Text>
-//       <Button
-//         title="To Detail"
-//         onPress={() =>
-//           navigation.navigate("Detail", {
-//             name: "Minh Trang 1310",
-//             obj: { id: 1, name: "MinhTrang", price: "100", unit: "$" },
-//           })
-//         }
-//       />
-//     </View>
-//   );
-// };
+const Stack = createStackNavigator();
 
-// const Detail = ({ route, navigation }: any) => {
-//   const { name, obj } = route.params;
-//   console.log(name, obj);
-//   return (
-//     <>
-//       <StatusBar backgroundColor={"#fff"} barStyle={"dark-content"}></StatusBar>
-//       <View
-//         style={{
-//           backgroundColor: "gray",
-//           flexDirection: "row",
-//           justifyContent: "space-between",
-//           paddingVertical: 15,
-//         }}
-//       >
-//         <TouchableOpacity onPress={() => navigation.goBack()}>
-//           <Text>Back</Text>
-//         </TouchableOpacity>
-//         <Text>Ring!</Text>
-//       </View>
-//       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-//         <Text>Detail Screen</Text>
-//         <Text>Nick name: {name}</Text>
-//         <Text>Họ và tên: {obj.name}</Text>
-//         <Text>
-//           Giá: {obj.price} ({obj.unit})
-//         </Text>
-//       </View>
-//     </>
-//   );
-// };
+const App: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+        console.log("token:", storedToken);
+        if (storedToken) {
+          const response = await axios.get(
+            "https://be-android-project.onrender.com/api/auth/me",
+            {
+              headers: {
+                Authorization: `Bearer ${storedToken}`,
+              },
+            }
+          );
+          // If the token is valid, set the token state
+          setToken(storedToken);
+        } else {
+          // No token found, start with login screen
+          setToken(null);
+        }
+      } catch (error) {
+        // If the token is invalid or the request returns 401
+        if (error.response && error.response.status === 401) {
+          Alert.alert(
+            "Session Expired",
+            "Token is not valid. Please log in again."
+          );
+          setToken(null); // Invalid token, redirect to login
+        } else {
+          console.error("Error fetching token or making request:", error);
+        }
+      } finally {
+        setIsLoading(false); // Mark token check as complete
+      }
+    };
 
-const requestCameraPermission = async () => {
-  try {
-    const checkPermission = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.CAMERA
+    checkToken();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
     );
-    if (checkPermission === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log("ok");
-    } else {
-      console.log("denied");
-    }
-  } catch (error) {}
-};
-const App = () => {
+  }
+
   return (
     <NavigationContainer>
-      <>
-        {/* <Stack.Navigator>
-          <Stack.Screen
-            name="Home"
-            component={Home}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Detail"
-            component={Detail}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator> */}
-        <Stack.Navigator>
-          <Stack.Screen
-            name="HomeTab"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="DetailItem"
-            component={Detail}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="LoginScreen"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          ></Stack.Screen>
-          <Stack.Screen
-            name="RegisterScreen"
-            component={RegisterScreen}
-            options={{ headerShown: false }}
-          ></Stack.Screen>
-        </Stack.Navigator>
-      </>
+      <Stack.Navigator
+        initialRouteName={token ? "tab" : "login"} // Redirect based on token validity
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="tab" component={TabNavigator} />
+        <Stack.Screen name="login" component={LoginScreen} />
+        <Stack.Screen name="register" component={RegisterScreen} />
+        <Stack.Screen name="profile" component={ProfileScreen} />
+        <Stack.Screen name="detailItem" component={Detail} />
+        <Stack.Screen name="notification" component={Notification} />
+      </Stack.Navigator>
     </NavigationContainer>
-    // <LoginScreen />
-    // <HomeScreen />
-    // <Demo1 />
-    // <Demo2 />
-    // <NYC />
   );
 };
 

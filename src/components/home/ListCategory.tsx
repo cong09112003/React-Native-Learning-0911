@@ -1,7 +1,7 @@
 import { Image, Text, View, StyleSheet } from "react-native";
 import React from "react";
-import NoteAddMore from "../components/NoteAddMore";
 import { ScrollView } from "react-native";
+import NoteAddMore from "./NoteAddMore";
 const ListCategory = () => {
   return (
     <>
@@ -11,46 +11,56 @@ const ListCategory = () => {
           <View style={styles.item}>
             <Image
               style={styles.photoItem}
-              source={require("../../assets/minhtrang60.jpg")}
+              source={{
+                uri: "https://media.vneconomy.vn/w800/images/upload/2024/09/12/can-ho-chung-cu-la-gi-ngoquocdung-com.jpg",
+              }}
             />
             <View style={styles.cateOver}>
-              <Text style={{ textAlign: "center" }}>Chè bưởi</Text>
+              <Text style={{ textAlign: "center" }}>Căn hộ nữ</Text>
             </View>
           </View>
           <View style={styles.item}>
             <Image
               style={styles.photoItem}
-              source={require("../../assets/minhtrangAus.jpg")}
+              source={{
+                uri: "https://media.vneconomy.vn/w800/images/upload/2024/09/12/can-ho-chung-cu-la-gi-ngoquocdung-com.jpg",
+              }}
             />
             <View style={styles.cateOver}>
-              <Text style={{ textAlign: "center" }}>Chè xanh</Text>
+              <Text style={{ textAlign: "center" }}>Nhà trọ</Text>
             </View>
           </View>
           <View style={styles.item}>
             <Image
               style={styles.photoItem}
-              source={require("../../assets/minhtrangAus.jpg")}
+              source={{
+                uri: "https://media.vneconomy.vn/w800/images/upload/2024/09/12/can-ho-chung-cu-la-gi-ngoquocdung-com.jpg",
+              }}
             />
             <View style={styles.cateOver}>
-              <Text style={{ textAlign: "center" }}>Chè bưởi</Text>
+              <Text style={{ textAlign: "center" }}>Căn hộ </Text>
             </View>
           </View>
           <View style={styles.item}>
             <Image
               style={styles.photoItem}
-              source={require("../../assets/minhtrangAus.jpg")}
+              source={{
+                uri: "https://media.vneconomy.vn/w800/images/upload/2024/09/12/can-ho-chung-cu-la-gi-ngoquocdung-com.jpg",
+              }}
             />
             <View style={styles.cateOver}>
-              <Text style={{ textAlign: "center" }}>Chè bưởi</Text>
+              <Text style={{ textAlign: "center" }}>Mini house</Text>
             </View>
           </View>
           <View style={styles.item}>
             <Image
               style={styles.photoItem}
-              source={require("../../assets/minhtrangAus.jpg")}
+              source={{
+                uri: "https://media.vneconomy.vn/w800/images/upload/2024/09/12/can-ho-chung-cu-la-gi-ngoquocdung-com.jpg",
+              }}
             />
             <View style={styles.cateOver}>
-              <Text style={{ textAlign: "center" }}>Chè bưởi</Text>
+              <Text style={{ textAlign: "center" }}>Kí túc xá</Text>
             </View>
           </View>
         </ScrollView>

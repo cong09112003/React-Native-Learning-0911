@@ -29,11 +29,13 @@ const Detail = ({ route }: any) => {
     <>
       <StatusBar translucent={true} backgroundColor="transparent" />
       <Image
-        source={require("../assets/minhtrang.jpg")}
+        source={{
+          uri: "https://storage.googleapis.com/digital-platform/hinh_anh_Can_ho_mau_Vinhomes_Smart_City_nhin_la_muon_o_ngay_so_3_4ee32c4231/hinh_anh_Can_ho_mau_Vinhomes_Smart_City_nhin_la_muon_o_ngay_so_3_4ee32c4231.jpg",
+        }}
         style={{ width: "100%", height: "50%" }}
       />
       <View style={styles.des}>
-        <Text style={{ color: "#fff" }}> Product name: {item.name}</Text>
+        <Text style={{ color: "#fff" }}> Product name: {item.title}</Text>
       </View>
       <TouchableOpacity
         style={styles.btn}
